@@ -1,0 +1,23 @@
+{
+    "name":  "real-estate-intelligence-mcp",
+    "version":  "1.0.0",
+    "execution":  {
+                      "runtime":  "cloud-run",
+                      "mode":  "remote"
+                  },
+    "memory":  {
+                   "type":  "rag",
+                   "authority":  "external",
+                   "required_before_reasoning":  true,
+                   "write_after_execution":  true
+               },
+    "contracts":  {
+                      "health_required":  true,
+                      "port":  8080
+                  },
+    "endpoints":  {
+                      "omni":  "/api/dispatch",
+                      "ready":  "/ready",
+                      "execute":  "/execute"
+                  }
+}

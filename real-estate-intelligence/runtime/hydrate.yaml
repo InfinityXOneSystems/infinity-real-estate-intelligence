@@ -1,0 +1,12 @@
+hydrate:
+  load:
+    - brain
+    - memory
+    - agents
+  validate:
+    - contracts
+    - router
+  bind:
+    - llm
+    - executors
+  mode: production

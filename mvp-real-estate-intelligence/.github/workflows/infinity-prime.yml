@@ -1,0 +1,43 @@
+name: Infinity Prime Gating
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *' # nightly run
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: ESLint
+        run: npm run lint --if-present
+      - name: Typecheck
+        run: npx tsc -p .
+      - name: Unit tests
+        run: npm test
+      - name: Contract check
+        run: node scripts/contract-check.js
+      - name: Build
+        run: npm run build --if-present
+      - name: Run full-validation
+        run: node scripts/full-validation.js
+      - name: Start server for smoke
+        run: node dist/index.js & sleep 2
+      - name: Smoke tests
+        env:
+          SMOKE_URL: http://localhost:8080/
+        run: node scripts/run-smoke-tests.js
+      - name: Upload final validation report (placeholder)
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-validation-report
+          path: docs/system/FINAL_VALIDATION_REPORT.md

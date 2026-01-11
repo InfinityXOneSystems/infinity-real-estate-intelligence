@@ -1,0 +1,12 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: infinityx-crawler
+spec:
+  template:
+    spec:
+      containers:
+        - image: gcr.io/PROJECT_ID/infinityx-crawler
+          env:
+            - name: CRAWLER_ENABLED
+              value: "true"

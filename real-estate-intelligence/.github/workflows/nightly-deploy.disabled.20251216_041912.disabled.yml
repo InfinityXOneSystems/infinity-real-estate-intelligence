@@ -1,0 +1,15 @@
+﻿name: Infinity Prime — Nightly Deploy Gate
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gate
+        run: |
+          echo "Nightly gate passed — replace with deploy step"

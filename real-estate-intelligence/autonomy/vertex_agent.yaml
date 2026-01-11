@@ -1,0 +1,14 @@
+﻿display_name: infinity-prime-agent
+description: Autonomous orchestrator for Workspace + GitHub + Cloud
+model: gemini-1.5-pro
+tools:
+  - type: code_interpreter
+  - type: retrieval
+  - type: function_calling
+memory:
+  type: persistent
+  backend: firestore
+permissions:
+  cloud_run: admin
+  vertex_ai: admin
+  storage: admin

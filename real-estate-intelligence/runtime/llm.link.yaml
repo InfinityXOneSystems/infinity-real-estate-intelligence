@@ -1,0 +1,4 @@
+llm_link:
+  direction: bidirectional
+  read: intelligence_output
+  write: prompts, plans

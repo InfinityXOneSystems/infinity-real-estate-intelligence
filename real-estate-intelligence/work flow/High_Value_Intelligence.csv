@@ -1,0 +1,7 @@
+Category,Description
+Distress Signals,"Probate, Tax Lien, Foreclosure"
+Market Signals,"DOM, Price Cuts, Volume"
+Equity Signals,"LTV, Equity Delta"
+Behavioral Signals,"Absentee, Heir Status"
+Outreach Signals,Response Latency
+Macro Signals,"Rates, Migration, Policy"

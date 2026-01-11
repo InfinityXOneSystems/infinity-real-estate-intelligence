@@ -1,0 +1,19 @@
+﻿name: Infinity Prime — Self Heal
+
+on:
+  workflow_run:
+    workflows: ["Infinity Prime — Agent Policy Gate"]
+    types: [completed]
+
+jobs:
+  heal:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auto Revert
+        run: |
+          git fetch origin
+          git reset --hard origin/main~1
+          git push --force

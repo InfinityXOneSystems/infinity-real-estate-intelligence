@@ -1,0 +1,86 @@
+name: CI — Strict Validate (Infinity Prime)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Guard — no tracked secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Checking for tracked .env files..."
+          tracked="$(git ls-files '.env' '.env.*' | grep -v '^\.env\.example$' || true)"
+          if [ -n "$tracked" ]; then
+            echo "::error::Tracked .env files detected (forbidden):"
+            echo "$tracked"
+            exit 1
+          fi
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Python — install deps (if requirements.txt exists)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+      - name: Python — syntax/bytecode compile (strict)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compileall -q .
+      - name: Python — run tests (if present)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d tests ] || ls -1 *.py 2>/dev/null | grep -q . ; then
+            if python -c "import pytest" 2>/dev/null; then
+              pytest -q
+            else
+              echo "pytest not installed; skipping tests."
+            fi
+          else
+            echo "No tests/py files detected; skipping."
+          fi
+      - name: Setup Node (if package.json exists)
+        if: ${{ hashFiles('package.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Node — install + lint + test (if scripts exist)
+        if: ${{ hashFiles('package.json') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          if npm run | grep -q " lint"; then npm run lint; else echo "No lint script."; fi
+          if npm run | grep -q " test"; then npm test; else echo "No test script."; fi
+      - name: Docker — validate compose contexts (strict)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f docker-compose.yml ] || [ -f docker-compose.yaml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
+            file=""
+            for f in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
+              if [ -f "$f" ]; then file="$f"; break; fi
+            done
+            echo "Compose file → $file"
+            docker compose -f "$file" config >/dev/null
+            # Build to catch missing contexts like services/gateway-ts
+            docker compose -f "$file" build --no-cache
+          else
+            echo "No compose file; skipping docker compose validation."
+          fi

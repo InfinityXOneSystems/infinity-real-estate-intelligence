@@ -1,0 +1,104 @@
+name: Real Estate Intelligence - Autonomous Cron
+
+on:
+  schedule:
+    # Run 4 times daily at optimal times (ET timezone)
+    - cron: '0 10 * * *'  # 6 AM ET (10:00 UTC)
+    - cron: '0 16 * * *'  # 12 PM ET (16:00 UTC)
+    - cron: '0 22 * * *'  # 6 PM ET (22:00 UTC)
+    - cron: '0 3 * * *'   # 11 PM ET (03:00 UTC next day)
+
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  NODE_VERSION: '20'
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: us-east1
+
+jobs:
+  intelligence-cycle:
+    name: Execute Intelligence Cycle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup environment
+        run: |
+          echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> .env
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "COINBASE_COMMERCE_API_KEY=${{ secrets.COINBASE_COMMERCE_API_KEY }}" >> .env
+          echo "ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}" >> .env
+          echo "TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }}" >> .env
+          echo "TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}" >> .env
+          echo "SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}" >> .env
+          echo "GOOGLE_SHEETS_ID=${{ secrets.GOOGLE_SHEETS_ID }}" >> .env
+          echo "GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}" >> .env
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Execute Intelligence Cycle
+        run: node dist/orchestrator.js
+        timeout-minutes: 30
+
+      - name: Upload execution logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: intelligence-logs-${{ github.run_number }}
+          path: logs/
+          retention-days: 30
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          curl -X POST https://hooks.slack.com/services/${{ secrets.SLACK_WEBHOOK }} \
+            -H 'Content-Type: application/json' \
+            -d '{"text":"âŒ Real Estate Intelligence cycle failed at $(date)"}'
+
+      - name: Sync to GCS bucket
+        if: success()
+        run: |
+          gsutil -m rsync -r data/ gs://real-estate-intelligence/data/
+          gsutil -m rsync -r logs/ gs://real-estate-intelligence/logs/
+
+      - name: Update dashboard
+        if: success()
+        run: |
+          echo "Dashboard update would happen here"
+          # This would trigger dashboard rebuild/refresh
+
+  health-check:
+    name: System Health Check
+    runs-on: ubuntu-latest
+    needs: intelligence-cycle
+    if: always()
+
+    steps:
+      - name: Check cycle status
+        run: |
+          if [ "${{ needs.intelligence-cycle.result }}" == "success" ]; then
+            echo "âœ… Intelligence cycle completed successfully"
+          else
+            echo "âŒ Intelligence cycle failed"
+            exit 1
+          fi

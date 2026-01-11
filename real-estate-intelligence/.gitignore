@@ -1,0 +1,35 @@
+# --- Secrets (NEVER COMMIT) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*service-account*.json
+*credentials*.json
+# --- INFINITY XOS SECRET LOCK ---
+*.json
+.env
+.env.*
+credentials.json
+workspace-sa.json
+CredentialManager/
+
+# --- INFINITY-XOS SECRET LOCK ---
+*.json
+.env
+.env.*
+credentials.json
+workspace-sa.json
+CredentialManager/
+.secrets/
+scan_output/
+_repo_inspection/
+scripts/inspect-*
+scripts/schaffold/
+_foundation_backup_*
+templates and docs.zip
+agents/mcp/*
+!agents/mcp/manifest.json
+
+# ignore local credentials
+.credentials/

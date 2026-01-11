@@ -1,0 +1,15 @@
+agent: strategist
+
+inputs:
+  - signals
+  - memory
+  - llm_context
+
+outputs:
+  - plans
+  - priorities
+  - intelligence_output
+
+constraints:
+  - no execution
+  - no memory deletion

@@ -1,0 +1,99 @@
+openapi: 3.1.0
+info:
+  title: Infinity Prime Control API
+  description: LLM-callable control plane for Infinity Prime (local & cloud)
+  version: 1.0.0
+servers:
+  - url: http://localhost:7070
+paths:
+  /system/status:
+    get:
+      operationId: getSystemStatus
+      summary: Get overall system status
+      responses:
+        "200":
+          description: OK
+  /system/scale:
+    post:
+      operationId: scaleService
+      summary: Scale a service up/down
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScaleRequest"
+      responses:
+        "200":
+          description: OK
+  /system/start:
+    post:
+      operationId: startService
+      summary: Start a service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServiceRequest"
+      responses:
+        "200":
+          description: OK
+  /system/stop:
+    post:
+      operationId: stopService
+      summary: Stop a service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServiceRequest"
+      responses:
+        "200":
+          description: OK
+  /system/diagnose:
+    post:
+      operationId: diagnose
+      summary: Run diagnostics
+      responses:
+        "200":
+          description: OK
+  /crawl/categories:
+    post:
+      operationId: updateCrawlCategories
+      summary: Update crawl categories via natural language
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrawlCategories"
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    ServiceRequest:
+      type: object
+      required: [service]
+      properties:
+        service:
+          type: string
+    ScaleRequest:
+      type: object
+      required: [service, replicas]
+      properties:
+        service:
+          type: string
+        replicas:
+          type: integer
+          minimum: 0
+    CrawlCategories:
+      type: object
+      required: [categories]
+      properties:
+        categories:
+          type: array
+          items:
+            type: string

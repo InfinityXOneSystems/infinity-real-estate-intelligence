@@ -1,0 +1,11 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: real-estate-intelligence
+spec:
+  template:
+    spec:
+      containers:
+        - image: gcr.io/PROJECT_ID/real-estate-intelligence
+          ports:
+            - containerPort: 8080

@@ -1,0 +1,6 @@
+  llm-controller:
+    build: ./llm/controller
+    ports:
+      - "7070:7070"
+    volumes:
+      - .:/app

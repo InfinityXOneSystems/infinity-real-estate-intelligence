@@ -1,0 +1,30 @@
+{
+  "name": "mvp-real-estate-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc -p .",
+    "test": "jest --runInBand",
+    "lint": "eslint . --ext .ts",
+    "full-validation": "node scripts/full-validation.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  ,
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.6.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.2.2",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@types/express": "^4.17.21",
+    "supertest": "^6.3.3",
+    "@types/supertest": "^2.0.11",
+    "hardhat": "^3.1.0"
+  }
+}

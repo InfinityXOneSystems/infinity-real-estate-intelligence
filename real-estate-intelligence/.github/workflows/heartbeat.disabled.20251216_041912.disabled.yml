@@ -1,0 +1,13 @@
+﻿name: Infinity Prime — Heartbeat
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Emit Heartbeat
+        run: echo "Infinity Prime heartbeat — $(date -u)"

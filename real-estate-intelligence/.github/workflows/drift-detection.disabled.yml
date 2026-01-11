@@ -1,0 +1,24 @@
+﻿name: Infinity Prime — Drift Detection
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Drift
+        run: |
+          set -e
+          test -f .genesis.json
+          git diff genesis-v0.1.0 --stat > drift.txt || true
+          if [ -s drift.txt ]; then
+            echo "DRIFT DETECTED"
+            cat drift.txt
+          else
+            echo "NO DRIFT"
+          fi

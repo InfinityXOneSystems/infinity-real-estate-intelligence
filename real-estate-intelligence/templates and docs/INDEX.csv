@@ -1,0 +1,35 @@
+Platinum REI System Templates (Headers + Tabs),
+Generated: 2025-12-20 12:05:37,
+,
+How to use:,
+1) Upload this .xlsx to Google Drive and open with Google Sheets (free).,
+2) Each tab contains only the header row — your pipeline writes rows beneath.,
+3) PF_* tabs = Investor-facing feed. OL_* tabs = Ops/Audit ledger. TL_* tabs = templates library.,
+,
+Tab Map,
+Tab Name,Purpose
+PF_LIVE_FEED,Investor-facing Platinum Dealflow Feed tab
+PF_PRIME_ONLY,Investor-facing Platinum Dealflow Feed tab
+PF_BUYERS,Investor-facing Platinum Dealflow Feed tab
+PF_INFLUENCERS,Investor-facing Platinum Dealflow Feed tab
+PF_DASHBOARD,Investor-facing Platinum Dealflow Feed tab
+PF_PROOF_PACK_LINKS,Investor-facing Platinum Dealflow Feed tab
+OL_RUNS,Ops Ledger / audit trail tab (rehydration-ready)
+OL_TASK_LEDGER,Ops Ledger / audit trail tab (rehydration-ready)
+OL_CRAWL_JOBS,Ops Ledger / audit trail tab (rehydration-ready)
+OL_RAW_EVENTS_INDEX,Ops Ledger / audit trail tab (rehydration-ready)
+OL_ENTITY_RESOLUTION,Ops Ledger / audit trail tab (rehydration-ready)
+OL_SCORECARD,Ops Ledger / audit trail tab (rehydration-ready)
+OL_PREDICTIONS,Ops Ledger / audit trail tab (rehydration-ready)
+OL_VALIDATION_LOG,Ops Ledger / audit trail tab (rehydration-ready)
+OL_PUBLISH_LOG,Ops Ledger / audit trail tab (rehydration-ready)
+OL_OUTREACH_LOG,Ops Ledger / audit trail tab (rehydration-ready)
+OL_APPOINTMENTS_LOG,Ops Ledger / audit trail tab (rehydration-ready)
+TL_GPT_TRIGGERS,"Templates Library tab (prompts, scripts, cadences, schemas)"
+TL_VALIDATOR_PROMPTS,"Templates Library tab (prompts, scripts, cadences, schemas)"
+TL_CALL_SCRIPTS,"Templates Library tab (prompts, scripts, cadences, schemas)"
+TL_EMAIL_TEMPLATES,"Templates Library tab (prompts, scripts, cadences, schemas)"
+TL_SMS_TEMPLATES,"Templates Library tab (prompts, scripts, cadences, schemas)"
+TL_DISPOSITION_RULES,"Templates Library tab (prompts, scripts, cadences, schemas)"
+TL_FOLLOWUP_CADENCE,"Templates Library tab (prompts, scripts, cadences, schemas)"
+TL_CALENDAR_EVENT_SCHEMAS,"Templates Library tab (prompts, scripts, cadences, schemas)"

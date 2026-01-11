@@ -1,0 +1,4 @@
+- id: sl-001
+  address: "123 Example St, St Lucie, FL"
+  price: 65000
+  notes: "Demo seed property"

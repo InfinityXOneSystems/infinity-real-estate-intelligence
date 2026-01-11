@@ -1,0 +1,11 @@
+name: HELIX CODE PERFECT PIPELINE
+
+on: [push]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Helix Validators
+        run: pwsh helix/validators/docker-path-check.ps1

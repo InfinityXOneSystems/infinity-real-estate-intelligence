@@ -1,0 +1,10 @@
+name: HELIX Review Gate
+
+on: pull_request
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'HELIX REVIEW — ALL CHECKS REQUIRED'

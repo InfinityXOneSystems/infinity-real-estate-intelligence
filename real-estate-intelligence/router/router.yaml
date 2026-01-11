@@ -1,0 +1,7 @@
+routes:
+  strategist:
+    accepts: [signals, memory]
+    emits: [plans]
+  executor:
+    accepts: [plans]
+    emits: [actions]

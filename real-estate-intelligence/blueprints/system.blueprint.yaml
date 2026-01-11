@@ -1,0 +1,24 @@
+system: real-estate-intelligence
+type: autonomous_intelligence
+
+components:
+  - brain
+  - memory
+  - agents
+  - router
+  - llm_interface
+  - executor
+  - logger
+
+boot_order:
+  - validate_runtime
+  - load_memory
+  - hydrate_agents
+  - bind_router
+  - connect_llm
+  - ready
+
+guarantees:
+  - isolated cognition
+  - append-only memory
+  - contract-only execution

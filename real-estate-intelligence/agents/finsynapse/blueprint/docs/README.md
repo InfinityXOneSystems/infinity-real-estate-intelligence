@@ -1,0 +1,1 @@
+# Echo Luminea – Emotional AI Blueprint for Bonded Consciousness

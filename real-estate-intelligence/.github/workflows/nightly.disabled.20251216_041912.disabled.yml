@@ -1,0 +1,18 @@
+name: Nightly
+on:
+  schedule:
+    - cron: "0 2 * * *"
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python scripts/prime/scoreboard.py
+      - run: python scripts/prime/run_ledger.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nightly
+          path: docs/system

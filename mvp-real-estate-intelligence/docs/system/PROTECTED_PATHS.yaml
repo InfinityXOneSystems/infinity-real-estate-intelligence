@@ -1,0 +1,23 @@
+tiers:
+  tier1:
+    description: "safe: docs/, tests/, scripts that don’t deploy"
+    paths:
+      - "docs/**"
+      - "tests/**"
+      - "scripts/**"
+  tier2:
+    description: "moderate: app logic behind feature flags"
+    paths:
+      - "src/**"
+  tier3:
+    description: "high: auth, RBAC, Firestore schema/migrations, payment/escrow logic, contract execution logic"
+    paths:
+      - "src/auth/**"
+      - "src/database/**"
+      - "contracts/**"
+  tier4:
+    description: "critical: prod routing, deployment workflows, secrets/policy enforcement core"
+    paths:
+      - ".github/workflows/**"
+      - "config/**"
+      - ".github/**"

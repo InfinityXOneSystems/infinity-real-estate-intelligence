@@ -1,0 +1,467 @@
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\AUTO_BOOT.ps1
+===============================
+while (\True) {
+  docker info > \ 2>&1
+  if (\0 -eq 0) { break }
+  Start-Sleep 5
+}
+Set-Location 'C:\AI\repos\InfinityXOneSystems'
+docker compose up -d --remove-orphans --no-build
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\cloudrun.yaml
+===============================
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: infinityx-gateway
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/PROJECT_ID/infinityx-gateway
+        ports:
+        - containerPort: 8080
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\docker-compose.yml
+===============================
+services:
+  gateway:
+    build: ./services/gateway-ts
+    ports: ["8090:8080"]
+    depends_on: [memory]
+
+  memory:
+    build: ./services/memory
+
+  agents:
+    build: ./services/agents
+    depends_on: [gateway]
+
+  crawler:
+    build: ./services/crawler
+    depends_on: [gateway]
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\ingest_test.json
+===============================
+{
+    "data":  {
+                 "reason":  "Tax delinquency",
+                 "address":  "123 Foreclosure Ave, FL",
+                 "signal":  "high"
+             },
+    "source":  "manual-test",
+    "type":  "distressed_property"
+}
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\RUNTIME.md
+===============================
+# InfinityXOneSystems – Runtime Contract
+
+This is a **polyglot AI platform**.
+
+## Language Ownership
+
+### TypeScript / Node.js
+- Gateway
+- Frontend
+- API routing
+- Dashboards
+
+### Python
+- AI agents
+- LLM orchestration
+- Ingestion
+- Reasoning
+- Memory
+
+## Hard Rules
+- Dockerfiles define runtime truth
+- Services do NOT change languages
+- Copilot must respect these boundaries
+- Cloud Run compatibility is mandatory
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\.github\copilot-instructions.md
+===============================
+You are working on InfinityXOneSystems.
+
+Rules:
+- Do NOT convert Python services to TypeScript
+- Do NOT rewrite Dockerfiles
+- Python is mandatory for agents and AI logic
+- TypeScript is mandatory for gateways and UI
+- Follow RUNTIME.md strictly
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\agents\market\market_state.json
+===============================
+{
+    "agents":  [
+
+               ],
+    "tasks":  [
+
+              ],
+    "note":  "market scaffold (hotfix): wire auctions + reputation next",
+    "ts":  "2025-12-12T04:55:56.4270567-05:00"
+}
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\agents\market\market_tick.ps1
+===============================
+param([Parameter(Mandatory)][string]$ROOT)
+
+$ErrorActionPreference="Stop"
+Set-StrictMode -Version Latest
+
+Import-Module (Join-Path $ROOT "system\governor\scf.psm1") -Force
+Import-Module (Join-Path $ROOT "system\meta\ucg\ucg.psm1") -Force
+
+Assert-ScfRunAllowed -ROOT $ROOT -Subsystem "agent.market"
+$run = Start-UcgRun -ROOT $ROOT -Subsystem "agent.market" -Script $PSCommandPath
+
+try {
+  Write-Host "Agent Market - Tick (hotfix)" -ForegroundColor Cyan
+
+  $out = Join-Path $ROOT "agents\market\market_state.json"
+  $dir = Split-Path -Parent $out
+  if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
+
+  @{
+    ts=(Get-Date).ToString("o")
+    agents=@()
+    tasks=@()
+    note="market scaffold (hotfix): wire auctions + reputation next"
+  } | ConvertTo-Json -Depth 10 | Out-File -FilePath $out -Encoding utf8
+
+  Write-UcgEvent -ROOT $ROOT -Type "agent.market.tick" -Data @{ out_path=$out; status="ok" }
+  Stop-UcgRun -ROOT $ROOT -RunId $run -Status "ok"
+  Write-Host "Market OK" -ForegroundColor Green
+} catch {
+  $err = $_.Exception.Message
+  try { Write-UcgEvent -ROOT $ROOT -Type "agent.market.tick" -Data @{ status="error"; error=$err } } catch {}
+  try { Stop-UcgRun -ROOT $ROOT -RunId $run -Status "error" -Error $err } catch {}
+  throw
+}
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\ingestion\discovery\discover.ps1
+===============================
+param([Parameter(Mandatory)][string]$ROOT)
+
+$ErrorActionPreference="Stop"
+Set-StrictMode -Version Latest
+
+Import-Module (Join-Path $ROOT "system\governor\scf.psm1") -Force
+Import-Module (Join-Path $ROOT "system\meta\ucg\ucg.psm1") -Force
+
+Assert-ScfRunAllowed -ROOT $ROOT -Subsystem "ingestion.discovery"
+$run = Start-UcgRun -ROOT $ROOT -Subsystem "ingestion.discovery" -Script $PSCommandPath
+
+try {
+  Write-Host "Ingestion Discovery - Tick (hotfix)" -ForegroundColor Cyan
+
+  $safe = ($env:INFINITY_SAFE_MODE -eq "1")
+  $out  = Join-Path $ROOT "ingestion\discovery\discovery_state.json"
+  $dir  = Split-Path -Parent $out
+  if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
+
+  @{
+    ts=(Get-Date).ToString("o")
+    safe_mode=$safe
+    discovered_sources=@()
+    note=$(if($safe){"safe_mode: network ingest disabled"}else{"discovery scaffold: wire crawlers next"})
+  } | ConvertTo-Json -Depth 10 | Out-File -FilePath $out -Encoding utf8
+
+  Write-UcgEvent -ROOT $ROOT -Type "ingestion.discovery.tick" -Data @{ out_path=$out; status="ok"; safe_mode=$safe }
+  Stop-UcgRun -ROOT $ROOT -RunId $run -Status "ok"
+  Write-Host "Discovery OK" -ForegroundColor Green
+} catch {
+  $err = $_.Exception.Message
+  try { Write-UcgEvent -ROOT $ROOT -Type "ingestion.discovery.tick" -Data @{ status="error"; error=$err } } catch {}
+  try { Stop-UcgRun -ROOT $ROOT -RunId $run -Status "error" -Error $err } catch {}
+  throw
+}
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\ingestion\discovery\discovery_state.json
+===============================
+{
+    "safe_mode":  false,
+    "discovered_sources":  [
+
+                           ],
+    "note":  "discovery scaffold: wire crawlers next",
+    "ts":  "2025-12-12T04:55:56.1590044-05:00"
+}
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\mcp\mcp.json
+===============================
+{ "chatgpt": true, "vscode": true, "github": true, "gcp": true }
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\mcp\registry.json
+===============================
+{
+  "mcp_version": "1.0",
+  "providers": {
+    "chatgpt": { "type": "llm", "priority": 1 },
+    "vscode":   { "type": "ide" },
+    "github":   { "type": "repo" },
+    "gcp":      { "type": "cloud" }
+  },
+  "policy": {
+    "default": "deny",
+    "allow": ["chatgpt","vscode","github","gcp"]
+  }
+}
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\agents\main.py
+===============================
+import time,requests,uuid
+while True:
+    job = {
+        "agent":"auto-scout",
+        "task":"analyze_recent_memory",
+        "id":str(uuid.uuid4())
+    }
+    requests.post("http://gateway:8080/ingest",json=job)
+    print("agent executed")
+    time.sleep(8)
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\agents-py\main.py
+===============================
+from fastapi import FastAPI
+import os
+import time
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {
+        "service": "InfinityX Agents",
+        "status": "online",
+        "time": time.time()
+    }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\agents-py\requirements.txt
+===============================
+fastapi
+uvicorn
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\crawler\crawler.py
+===============================
+import time,requests,uuid,random
+
+while True:
+    payload = {
+        "type": "distressed_property",
+        "address": f"{random.randint(100,999)} Foreclosure Ave",
+        "signal": "tax_delinquent",
+        "confidence": round(random.uniform(0.85,0.99),2),
+        "crawl_id": str(uuid.uuid4())
+    }
+    try:
+        requests.post("http://gateway:8080/ingest", json=payload, timeout=3)
+        print("crawler sent:", payload["crawl_id"])
+    except Exception as e:
+        print("gateway not ready")
+    time.sleep(6)
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\gateway\package.json
+===============================
+{
+  "name": "infinityx-gateway",
+  "scripts": { "start": "node server.js" }
+}
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\gateway\server.js
+===============================
+const http = require('http');
+http.createServer((_, res) => {
+  res.end(JSON.stringify({
+    system: 'InfinityX',
+    status: 'online',
+    mcp: '/mcp'
+  }));
+}).listen(8080);
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\gateway-ts\index.js
+===============================
+const express = require("express");
+const app = express();
+app.use(express.json());
+
+app.get("/", (_, res) =>
+  res.json({ service: "InfinityX Gateway", status: "online" })
+);
+
+app.get("/health", (_, res) => res.json({ ok: true }));
+
+app.post("/ingest", (req, res) => {
+  res.json({ ok: true });
+});
+
+app.post("/query", (req, res) => {
+  if (!req.body || !req.body.intent) {
+    return res.status(400).json({
+      error: "missing intent",
+      example: { intent: "find_distressed_properties" }
+    });
+  }
+  res.json({ result: "stubbed-response", confidence: 0.99 });
+});
+
+app.listen(8080, "0.0.0.0", () =>
+  console.log("Gateway listening on 8080")
+);
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\gateway-ts\package.json
+===============================
+{
+  "name": "infinityx-gateway",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.19.2",
+    "node-fetch": "2.6.12"
+  }
+}
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\gateway-ts\mcp\mcp.json
+===============================
+{
+  "chatgpt": { "enabled": true },
+  "vscode":  { "enabled": true },
+  "github":  { "enabled": true },
+  "gcp":     { "enabled": true }
+}
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\gateway-ts\src\index.js
+===============================
+import http from 'http';
+
+const port = process.env.PORT || 8080;
+
+http.createServer((_, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ service: 'gateway', status: 'alive' }));
+}).listen(port);
+
+console.log('Gateway running on port', port);
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\memory\memory.py
+===============================
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return { "service": "memory", "status": "online" }
+
+@app.get("/health")
+def health():
+    return { "ok": True }
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\router\registry.json
+===============================
+{
+  "mcp_version": "1.0",
+  "providers": {
+    "chatgpt": { "type": "llm", "priority": 1 },
+    "vscode":   { "type": "ide" },
+    "github":   { "type": "repo" },
+    "gcp":      { "type": "cloud" }
+  },
+  "policy": {
+    "default": "deny",
+    "allow": ["chatgpt","vscode","github","gcp"]
+  }
+}
+
+
+
+===============================
+FILE: C:\AI\repos\real-intel-system\services\router\router.py
+===============================
+from fastapi import FastAPI
+import json
+
+app = FastAPI()
+registry = json.load(open('registry.json'))
+
+@app.get('/mcp')
+def mcp():
+    return registry
+

@@ -1,0 +1,6 @@
+[submodule "vision-cortex"]
+	path = vision-cortex
+	url = https://github.com/InfinityXOneSystems/vision_cortex.git
+[submodule "doc-evolution-system"]
+	path = doc-evolution-system
+	url = https://github.com/InfinityXOneSystems/doc_evolution_system.git
